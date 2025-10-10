@@ -3,9 +3,13 @@ const BOARD_WIDTH = 10;
 const BOARD_HEIGHT = 20;
 const COLORS = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#FFA500'];
 
-let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-// Фигуры Тетриса
+function getCanvasSize() {
+    const maxWidth = Math.min(300, window.innerWidth - 40);
+    return Math.floor(maxWidth / 10) * 10;
+}
+
 const SHAPES = [
     { shape: [[1,1,1,1]], color: 0, name: 'I' },
     { shape: [[1,1],[1,1]], color: 1, name: 'O' },
@@ -32,45 +36,22 @@ let gameState = {
     renderY: 0
 };
 
-// Игровая логика Тетриса
 function initGame() {
     const canvas = document.getElementById('gameCanvas');
-    document.addEventListener('keydown', handleKeyPress);
+    if (!canvas) {
+        console.error('Canvas not found!');
+        return;
+    }
+    
+    const canvasSize = getCanvasSize();
+    const blockSize = canvasSize / 10;
+    
+    canvas.width = canvasSize;
+    canvas.height = blockSize * 20;
+    
     const ctx = canvas.getContext('2d');
     
-		const maxWidth = Math.min(300, window.innerWidth - 40);
-    const calculatedBlockSize = Math.floor(maxWidth / BOARD_WIDTH);
-    const actualBlockSize = Math.max(20, calculatedBlockSize);
-
-    canvas.width = BOARD_WIDTH * actualBlockSize;
-    canvas.height = BOARD_HEIGHT * actualBlockSize;
-
-    const originalBlockSize = BLOCK_SIZE;
-    BLOCK_SIZE = actualBlockSize;
-
-    function handleKeyPress(event) {
-        if (!gameState.gameActive || !gameState.currentPiece) return;
-        
-        switch(event.key) {
-            case 'ArrowLeft':
-                movePiece(-1, 0);
-                break;
-            case 'ArrowRight':
-                movePiece(1, 0);
-                break;
-            case 'ArrowDown':
-                movePiece(0, 1);
-                break;
-            case 'ArrowUp':
-                rotatePiece();
-                break;
-        }
-    }
-
-    canvas.width = BOARD_WIDTH * BLOCK_SIZE;
-    canvas.height = BOARD_HEIGHT * BLOCK_SIZE;
-    
-    const board = Array(BOARD_HEIGHT).fill().map(() => Array(BOARD_WIDTH).fill(0));
+    const board = Array(20).fill().map(() => Array(10).fill(0));
     
     gameState = {
         board: board,
@@ -82,11 +63,9 @@ function initGame() {
         gameActive: true,
         dropTime: Date.now(),
         dropInterval: 800,
+        blockSize: blockSize,
         lastMoveTime: 0,
-        moveDelay: 100,
-        renderX: 0,
-        renderY: 0,
-        actualBlockSize: actualBlockSize
+        moveDelay: 100
     };
     
     updateGameStats();
@@ -94,9 +73,7 @@ function initGame() {
     setupMobileControls();
     setupTouchControls();
     
-    requestAnimationFrame(() => gameLoop(ctx));
-    
-    BLOCK_SIZE = originalBlockSize;
+    gameLoop(ctx);
 }
 
 function setupTouchControls() {
@@ -132,36 +109,32 @@ function setupTouchControls() {
         const minSwipeDistance = 30;
         
         if (Math.abs(diffX) > Math.abs(diffY)) {
-            // Горизонтальный свайп
             if (Math.abs(diffX) > minSwipeDistance) {
                 if (diffX > 0) {
-                    movePiece(1, 0); // Вправо
+                    movePiece(1, 0);
                 } else {
-                    movePiece(-1, 0); // Влево
+                    movePiece(-1, 0);
                 }
                 lastSwipeTime = currentTime;
             }
         } else {
-            // Вертикальный свайп
             if (Math.abs(diffY) > minSwipeDistance) {
                 if (diffY > 0) {
-                    movePiece(0, 1); // Вниз
+                    movePiece(0, 1);
                 } else {
-                    rotatePiece(); // Вверх - вращение
+                    rotatePiece();
                 }
                 lastSwipeTime = currentTime;
             }
         }
     }, { passive: false });
     
-    // Двойное нажатие для паузы/продолжения
     let lastTap = 0;
     canvas.addEventListener('touchstart', function(e) {
         const currentTime = new Date().getTime();
         const tapLength = currentTime - lastTap;
         
         if (tapLength < 300 && tapLength > 0) {
-            // Двойное нажатие - пауза/продолжение
             gameState.gameActive = !gameState.gameActive;
             if (gameState.gameActive) {
                 gameState.dropTime = Date.now();
@@ -183,14 +156,12 @@ function generateNewPiece() {
 }
 
 function drawBoard(ctx) {
-    // Очистка canvas с градиентом
     const gradient = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
     gradient.addColorStop(0, '#1a1a2e');
     gradient.addColorStop(1, '#16213e');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     
-    // Рисуем сетку
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
     ctx.lineWidth = 1;
     
@@ -216,26 +187,23 @@ function drawBoard(ctx) {
 }
 
 function drawBlock(ctx, x, y, color, isPlaced = false) {
-    // Основной блок
-    ctx.fillStyle = color;
-    ctx.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+    const size = gameState.blockSize;
     
-    // 3D эффект
+    ctx.fillStyle = color;
+    ctx.fillRect(x * size, y * size, size, size);
+    
     if (isPlaced) {
-        // Верхний свет
         ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-        ctx.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, 2);
-        ctx.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, 2, BLOCK_SIZE);
+        ctx.fillRect(x * size, y * size, size, 2);
+        ctx.fillRect(x * size, y * size, 2, size);
         
-        // Нижняя тень
         ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-        ctx.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE + BLOCK_SIZE - 2, BLOCK_SIZE, 2);
-        ctx.fillRect(x * BLOCK_SIZE + BLOCK_SIZE - 2, y * BLOCK_SIZE, 2, BLOCK_SIZE);
+        ctx.fillRect(x * size, y * size + size - 2, size, 2);
+        ctx.fillRect(x * size + size - 2, y * size, 2, size);
     } else {
-        // Контур для падающей фигуры
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
         ctx.lineWidth = 2;
-        ctx.strokeRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+        ctx.strokeRect(x * size, y * size, size, size);
     }
 }
 
