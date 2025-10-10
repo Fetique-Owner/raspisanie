@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>School Helper</title>
+	<link rel="stylesheet" href="style.css">
+	<script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+
+<body>
+	<div class="container">
+		<!-- Главное меню -->
+		<div id="mainMenu" class="screen active">
+			<h1>🏫 School Helper</h1>
+			<div class="main-options">
+				<button onclick="openSchedule()" class="main-btn">
+					<span class="icon">📅</span>
+					<span class="title">Расписание</span>
+					<span class="desc">Красивое расписание на неделю</span>
+				</button>
+
+				<button onclick="openGames()" class="main-btn">
+					<span class="icon">🎮</span>
+					<span class="title">Игры</span>
+					<span class="desc">Sextris, шахматы и другие игры</span>
+				</button>
+			</div>
+		</div>
+
+		<!-- Меню расписания -->
+		<div id="scheduleScreen" class="screen">
+			<h1>📅 Расписание</h1>
+			<div class="schedule-container">
+				<div class="schedule-nav">
+					<button onclick="showDay('понедельник')" class="day-btn active">Пн</button>
+					<button onclick="showDay('вторник')" class="day-btn">Вт</button>
+					<button onclick="showDay('среда')" class="day-btn">Ср</button>
+					<button onclick="showDay('четверг')" class="day-btn">Чт</button>
+					<button onclick="showDay('пятница')" class="day-btn">Пт</button>
+					<button onclick="showDay('суббота')" class="day-btn">Сб</button>
+					<button onclick="showDay('воскресенье')" class="day-btn">Вс</button>
+				</div>
+				<div id="scheduleContent" class="schedule-content">
+				</div>
+			</div>
+			<button onclick="backToMainMenu()" class="back-btn">← Назад</button>
+		</div>
+
+		<!-- Меню игр -->
+		<div id="gamesScreen" class="screen">
+			<h1>🎮 Игры</h1>
+			<div class="menu-options">
+				<button onclick="openGame('Sextris')" class="menu-btn">
+					🧩 Sextris
+				</button>
+				<button onclick="openChessMenu()" class="menu-btn">
+					♟️ Шахматы
+				</button>
+				<button onclick="backToMainMenu()" class="menu-btn back">
+					← Назад
+				</button>
+			</div>
+		</div>
+
+		<!-- Меню Sextris -->
+		<div id="SextrisMenu" class="screen">
+			<h1>🧩 Sextris</h1>
+			<div class="menu-options">
+				<button onclick="startGame()" class="menu-btn">
+					🎮 Начать игру
+				</button>
+				<button onclick="showLeaderboard()" class="menu-btn">
+					🏆 Таблица лидеров
+				</button>
+				<button onclick="backToGamesMenu()" class="menu-btn back">
+					← Назад
+				</button>
+			</div>
+		</div>
+
+		<!-- Игровой экран -->
+		<div id="gameScreen" class="screen">
+			<div class="game-header">
+				<div class="game-stats">
+					<div class="stat">Очки: <span id="score">0</span></div>
+					<div class="stat">Уровень: <span id="level">1</span></div>
+					<div class="stat">Линии: <span id="lines">0</span></div>
+				</div>
+				<div class="next-piece-container">
+					<div class="next-label">Следующая:</div>
+					<canvas id="nextPieceCanvas" width="80" height="80"></canvas>
+				</div>
+				<div class="game-controls">
+					<button onclick="restartGame()" class="control-btn-small">🔄</button>
+					<button onclick="backToGameMenu()" class="control-btn-small">←</button>
+				</div>
+			</div>
+
+			<div class="game-area">
+				<canvas id="gameCanvas"></canvas>
+			</div>
+
+			<!-- Мобильное управление -->
+			<div id="mobileControls" class="mobile-controls"></div>
+
+			<div class="game-instructions">
+				💡 <b>Sextris</b> - Собирай линии!
+			</div>
+		</div>
+
+		<!-- Меню шахмат -->
+		<div id="chessMenu" class="screen">
+			<h1>♟️ Шахматы</h1>
+			<div class="menu-options">
+				<button onclick="startChessWithFriend()" class="menu-btn">
+					👥 Играть с другом
+				</button>
+				<button onclick="showChessLeaderboard()" class="menu-btn">
+					📊 Рейтинг шахматистов
+				</button>
+				<!-- В chessMenu добавьте -->
+				<button onclick="createNewChessGame()" class="menu-btn" style="background: rgba(76, 175, 80, 0.3);">
+					🆕 Создать игру
+				</button>
+				<button onclick="showJoinGameDialog()" class="menu-btn" style="background: rgba(33, 150, 243, 0.3);">
+					🔗 Присоединиться по ID
+				</button>
+				<button onclick="backToGamesMenu()" class="menu-btn back">
+					← Назад
+				</button>
+			</div>
+		</div>
+
+		<!-- Экран выбора друга для шахмат -->
+		<div id="chessFriendScreen" class="screen">
+			<h1>👥 Выбери друга</h1>
+			<div class="friends-list">
+				<div class="search-box">
+					<input type="text" id="friendSearch" placeholder="Поиск друга..." class="search-input">
+				</div>
+				<div id="friendsContainer" class="friends-container">
+				</div>
+			</div>
+			<button onclick="backToChessMenu()" class="back-btn">← Назад</button>
+		</div>
+
+		<!-- Экран шахматной игры -->
+		<div id="chessGameScreen" class="screen">
+			<div class="game-header">
+				<div class="game-stats">
+					<div class="stat" id="chessGameStatus">Подключение...</div>
+					<div class="stat">Игра: <span id="gameId">-</span></div>
+					<div class="stat">Цвет: <span id="playerColor">-</span></div>
+				</div>
+				<div class="game-controls">
+					<button onclick="offerDraw()" class="control-btn-small">🤝 Ничья</button>
+					<button onclick="surrenderChessGame()" class="control-btn-small">🏳️ Сдаться</button>
+					<button onclick="copyGameLink()" class="control-btn-small">🔗 Ссылка</button>
+					<button onclick="backToChessMenu()" class="control-btn-small">←</button>
+				</div>
+			</div>
+
+			<div class="game-area">
+				<div class="chess-board-container">
+					<canvas id="chessCanvas"></canvas>
+				</div>
+			</div>
+
+			<div class="game-info">
+				<div class="players-info">
+					<div class="player white">
+						<span class="player-color">⚪</span>
+						<span id="whitePlayer">Ожидание...</span>
+					</div>
+					<div class="player black">
+						<span class="player-color">⚫</span>
+						<span id="blackPlayer">Ожидание...</span>
+					</div>
+				</div>
+			</div>
+
+			<div class="game-instructions">
+				♟️ <b>Шахматы</b> - Ходите по очереди. Ваш ход подсвечен зеленым.
+			</div>
+		</div>
+
+		<!-- Таблица лидеров -->
+		<div id="leaderboardScreen" class="screen">
+			<h2>🏆 Таблица лидеров</h2>
+			<div id="leadersList" class="leaders-container"></div>
+			<button onclick="backToGameMenu()" class="back-btn">← Назад</button>
+		</div>
+	</div>
+
+	<script src="main.js"></script>
+	<script src="schedule.js"></script>
+	<script src="game.js"></script>
+	<script src="leaderboard.js"></script>
+</body>
+
+</html>
