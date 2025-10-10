@@ -348,29 +348,10 @@ function offerDraw() {
         });
     }
 }
-
-function simulateMultiplayerGame() {
-    startChessGame(123, 'Тестовый игрок');
-    
-    setTimeout(() => {
-        if (window.Telegram && Telegram.WebApp) {
-            Telegram.WebApp.showPopup({
-                title: 'Игрок подключился!',
-                message: 'Тестовый игрок присоединился к игре',
-                buttons: [{ type: 'ok' }]
-            });
-        }
-    }, 2000);
-}
-
-// Добавьте в main.js
-
-// Инициализация шахматного API
 function initChessAPI() {
     if (chessAPI.init()) {
         console.log('Chess API инициализирован');
         
-        // Проверяем параметры URL для автоматического присоединения к игре
         const urlParams = new URLSearchParams(window.location.search);
         const chessGameId = urlParams.get('chess');
         
@@ -382,13 +363,11 @@ function initChessAPI() {
     }
 }
 
-// Автоматическое присоединение к игре по ссылке
 async function autoJoinChessGame(gameId) {
     showScreen('chessGameScreen');
     
     const result = await chessAPI.joinGame(gameId);
     if (result.success) {
-        // Определяем цвет игрока (в реальном приложении будет с сервера)
         const playerColor = Math.random() > 0.5 ? 'white' : 'black';
         
         initChessGame(playerColor);
@@ -484,5 +463,4 @@ function startChessGame(friendId, friendName) {
 
 document.addEventListener('DOMContentLoaded', function() {
     initChessAPI();
-
 });
