@@ -111,21 +111,15 @@
 		</div>
 
 		<!-- Меню шахмат -->
+		<!-- Меню шахмат -->
 		<div id="chessMenu" class="screen">
 			<h1>♟️ Шахматы</h1>
 			<div class="menu-options">
-				<button onclick="startChessWithFriend()" class="menu-btn">
-					👥 Играть с другом
-				</button>
-				<button onclick="showChessLeaderboard()" class="menu-btn">
-					📊 Рейтинг шахматистов
-				</button>
-				<!-- В chessMenu добавьте -->
-				<button onclick="createNewChessGame()" class="menu-btn" style="background: rgba(76, 175, 80, 0.3);">
+				<button onclick="createNewChessGame()" class="menu-btn">
 					🆕 Создать игру
 				</button>
-				<button onclick="showJoinGameDialog()" class="menu-btn" style="background: rgba(33, 150, 243, 0.3);">
-					🔗 Присоединиться по ID
+				<button onclick="showScreen('chessFriendScreen')" class="menu-btn">
+					👥 Играть с другом
 				</button>
 				<button onclick="backToGamesMenu()" class="menu-btn back">
 					← Назад
