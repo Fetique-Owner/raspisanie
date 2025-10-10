@@ -463,7 +463,7 @@ function updateGameUI(gameState) {
 
 function copyGameLink() {
     const gameId = document.getElementById('gameId').textContent;
-    const inviteLink = `https://t.me/your_bot?start=chess_${gameId}`;
+    const inviteLink = `https://t.me/@tes1tes1tes1bot?start=chess_${gameId}`;
     
     navigator.clipboard.writeText(inviteLink).then(() => {
         if (window.Telegram && Telegram.WebApp) {
@@ -484,4 +484,5 @@ function startChessGame(friendId, friendName) {
 
 document.addEventListener('DOMContentLoaded', function() {
     initChessAPI();
+
 });
