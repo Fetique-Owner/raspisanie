@@ -26,7 +26,6 @@ class ChessGame {
         ];
     }
 
-    // Основные методы игры
     selectPiece(row, col) {
         if (!this.gameActive || this.currentPlayer !== this.playerColor) {
             return false;
@@ -49,7 +48,49 @@ class ChessGame {
         return true;
     }
 
-    // Обновите метод movePiece в ChessGame
+async movePiece(toRow, toCol) {
+    if (!this.selectedPiece || !this.isValidMove(toRow, toCol)) {
+        return false;
+    }
+
+    const { row: fromRow, col: fromCol, piece } = this.selectedPiece;
+    
+    try {
+        if (window.Telegram && Telegram.WebApp) {
+            Telegram.WebApp.sendData(JSON.stringify({
+                command: 'chess_move',
+                gameId: this.gameId,
+                from: [fromRow, fromCol],
+                to: [toRow, toCol],
+                piece: piece
+            }));
+        }
+        
+        // Локальное обновление доски
+        this.board[toRow][toCol] = piece;
+        this.board[fromRow][fromCol] = '';
+        
+        this.moveHistory.push({
+            from: { row: fromRow, col: fromCol },
+            to: { row: toRow, col: toCol },
+            piece: piece
+        });
+        
+        this.currentPlayer = this.currentPlayer === 'white' ? 'black' : 'white';
+        this.selectedPiece = null;
+        this.validMoves = [];
+        
+        drawChessBoard();
+        setupChessPieces();
+        updateChessGameStatus();
+        
+        return true;
+    } catch (error) {
+        console.error('Ошибка отправки хода:', error);
+        return false;
+    }
+}
+
 movePiece(toRow, toCol) {
     if (!this.selectedPiece || !this.isValidMove(toRow, toCol)) {
         return false;
@@ -57,10 +98,8 @@ movePiece(toRow, toCol) {
 
     const { row: fromRow, col: fromCol, piece } = this.selectedPiece;
     
-    // Отправляем ход на сервер
     chessAPI.sendMove([fromRow, fromCol], [toRow, toCol]).then(result => {
         if (result.success) {
-            // Ход успешно отправлен, обновляем локальную доску
             this.board[toRow][toCol] = piece;
             this.board[fromRow][fromCol] = '';
             
@@ -411,20 +450,17 @@ function setupChessTouchControls() {
         
         if (!currentChessGame.isInBounds(row, col)) return;
         
-        // Если фигура уже выбрана, пытаемся сделать ход
         if (currentChessGame.selectedPiece) {
             if (currentChessGame.movePiece(row, col)) {
                 drawChessBoard();
                 setupChessPieces();
                 updateChessGameStatus();
             } else {
-                // Если ход не удался, выбираем новую фигуру
                 currentChessGame.selectPiece(row, col);
                 drawChessBoard();
                 setupChessPieces();
             }
         } else {
-            // Выбираем фигуру
             currentChessGame.selectPiece(row, col);
             drawChessBoard();
             setupChessPieces();
