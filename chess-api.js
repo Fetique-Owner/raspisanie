@@ -1,1 +1,88 @@
-class ChessAPI {constructor() {this.baseUrl = 'https://api.telegram.org/bot' + (window.Telegram?.WebApp?.initData || ''); this.currentGameId = null;this.userId = null;}init() { if (window.Telegram && Telegram.WebApp) { this.userId = Telegram.WebApp.initDataUnsafe?.user?.id;return true; } return false;  } async createGame() {try { const gameId = 'chess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);this.currentGameId = gameId; return {success: true,gameId: gameId,inviteLink: `https://t.me/@tes1tes1tes1bot?start=chess_${gameId}` };} catch (error) {console.error('Ошибка создания игры:', error); return { success: false, error: error.message }; }   }  async joinGame(gameId) {  try { this.currentGameId = gameId; return { success: true,gameId: gameId, message: 'Вы успешно присоединились к игре' };} catch (error) {console.error('Ошибка присоединения:', error); return { success: false, error: error.message };}} async sendMove(from, to) {if (!this.currentGameId) {return { success: false, error: 'Игра не выбрана' };} try {const moveData = {gameId: this.currentGameId,from: from,to: to,userId: this.userId, timestamp: Date.now()}; console.log('Отправка хода:', moveData);return { success: true, move: moveData };} catch (error) {console.error('Ошибка отправки хода:', error);return { success: false, error: error.message };}}async getGameState() {if (!this.currentGameId) {return { success: false, error: 'Игра не выбрана' };}try {const gameState = {gameId: this.currentGameId,board: currentChessGame ? currentChessGame.board : null,currentTurn: currentChessGame ? currentChessGame.currentPlayer : 'white',players: {white: { name: 'Игрок 1' },black: { name: 'Игрок 2' }},yourColor: currentChessGame ? currentChessGame.playerColor : 'white'};return { success: true, state: gameState };} catch (error) {console.error('Ошибка получения состояния:', error);return { success: false, error: error.message };}}async offerDraw() {if(!this.currentGameId) {return { success: false, error: 'Игра не выбрана' };}try{console.log('Предложение ничьи отправлено');return { success: true };} catch (error) {return { success: false, error: error.message };}}async surrender() {if (!this.currentGameId) {return { success: false, error: 'Игра не выбрана' };}try {console.log('Игрок сдался');return { success: true };} catch (error) {return { success: false, error: error.message };}}}const chessAPI = new ChessAPI();
+class ChessAPI {
+    constructor() {
+        this.baseUrl = 'https://api.telegram.org/bot';
+        this.currentGameId = null;
+        this.userId = null;
+        this.pollingInterval = null;
+    }
+
+ async sendToBot(command, data = {}) {
+        try {
+            if (window.Telegram && Telegram.WebApp) {
+                Telegram.WebApp.sendData(JSON.stringify({
+                    command: command,
+                    ...data,
+                    userId: this.userId
+                }));
+                return { success: true };
+            }
+            return { success: false, error: 'Telegram WebApp not available' };
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    }
+
+    init() {
+        if (window.Telegram && Telegram.WebApp) {
+            this.userId = Telegram.WebApp.initDataUnsafe?.user?.id;
+            return true;
+        }
+        return false;
+    }
+
+    async createGame() {
+        return await this.sendToBot('create_chess_game');
+    }
+
+    // Присоединение к игре
+    async joinGame(gameId) {
+        return await this.sendToBot('join_chess_game', { gameId });
+    }
+
+    // Отправка хода
+    async sendMove(from, to) {
+        return await this.sendToBot('chess_move', {
+            gameId: this.currentGameId,
+            from: from,
+            to: to
+        });
+    }
+
+    // Получение состояния игры
+    async getGameState() {
+        return await this.sendToBot('get_chess_state', {
+            gameId: this.currentGameId
+        });
+    }
+
+
+    // Предложить ничью
+    async offerDraw() {
+        if (!this.currentGameId) {
+            return { success: false, error: 'Игра не выбрана' };
+        }
+
+        try {
+            console.log('Предложение ничьи отправлено');
+            return { success: true };
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    }
+
+    // Сдаться
+    async surrender() {
+        if (!this.currentGameId) {
+            return { success: false, error: 'Игра не выбрана' };
+        }
+
+        try {
+            console.log('Игрок сдался');
+            return { success: true };
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    }
+}
+
+const chessAPI = new ChessAPI();
