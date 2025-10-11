@@ -18,13 +18,19 @@
 				<button onclick="openSchedule()" class="main-btn">
 					<span class="icon">📅</span>
 					<span class="title">Расписание</span>
-					<span class="desc">Красивое расписание на неделю</span>
+					<span class="desc">Уроки на неделю</span>
 				</button>
 
 				<button onclick="openGames()" class="main-btn">
 					<span class="icon">🎮</span>
 					<span class="title">Игры</span>
-					<span class="desc">Sextris, шахматы и другие игры</span>
+					<span class="desc">Чтобы потупить</span>
+				</button>
+
+				<button onclick="openGallery()" class="main-btn">
+					<span class="icon">📸</span>
+					<span class="title">Галерея</span>
+					<span class="desc">Фото и видео класса</span>
 				</button>
 			</div>
 		</div>
@@ -55,9 +61,11 @@
 				<button onclick="openGame('Sextris')" class="menu-btn">
 					🧩 Sextris
 				</button>
-				<button onclick="openChessMenu()" class="menu-btn">
-					♟️ Шахматы
+				<!--
+				<button onclick="startDanceGame()" class="menu-btn">
+					💃 Танцевальная аркада
 				</button>
+				-->
 				<button onclick="backToMainMenu()" class="menu-btn back">
 					← Назад
 				</button>
@@ -82,19 +90,32 @@
 
 		<!-- Игровой экран -->
 		<div id="gameScreen" class="screen">
-			<div class="game-header">
-				<div class="game-stats">
-					<div class="stat">Очки: <span id="score">0</span></div>
-					<div class="stat">Уровень: <span id="level">1</span></div>
-					<div class="stat">Линии: <span id="lines">0</span></div>
-				</div>
-				<div class="next-piece-container">
-					<div class="next-label">Следующая:</div>
-					<canvas id="nextPieceCanvas" width="80" height="80"></canvas>
-				</div>
-				<div class="game-controls">
-					<button onclick="restartGame()" class="control-btn-small">🔄</button>
-					<button onclick="backToGameMenu()" class="control-btn-small">←</button>
+			<div class="game-header-compact">
+				<div class="game-info-panel">
+					<div class="stats-grid">
+						<div class="stat-item">
+							<div class="stat-label">Очки</div>
+							<div id="score" class="stat-value">0</div>
+						</div>
+						<div class="stat-item">
+							<div class="stat-label">Уровень</div>
+							<div id="level" class="stat-value">1</div>
+						</div>
+						<div class="stat-item">
+							<div class="stat-label">Линии</div>
+							<div id="lines" class="stat-value">0</div>
+						</div>
+					</div>
+
+					<div class="next-piece-panel">
+						<div class="next-label">Следующий:</div>
+						<canvas id="nextPieceCanvas" width="60" height="60"></canvas>
+					</div>
+
+					<div class="game-controls-compact">
+						<button onclick="restartGame()" class="control-btn-small">🔄</button>
+						<button onclick="backToGameMenu()" class="control-btn-small">←</button>
+					</div>
 				</div>
 			</div>
 
@@ -106,77 +127,7 @@
 			<div id="mobileControls" class="mobile-controls"></div>
 
 			<div class="game-instructions">
-				💡 <b>Sextris</b> - Собирай линии!
-			</div>
-		</div>
-
-		<!-- Меню шахмат -->
-		<!-- Меню шахмат -->
-		<div id="chessMenu" class="screen">
-			<h1>♟️ Шахматы</h1>
-			<div class="menu-options">
-				<button onclick="createNewChessGame()" class="menu-btn">
-					🆕 Создать игру
-				</button>
-				<button onclick="showScreen('chessFriendScreen')" class="menu-btn">
-					👥 Играть с другом
-				</button>
-				<button onclick="backToGamesMenu()" class="menu-btn back">
-					← Назад
-				</button>
-			</div>
-		</div>
-
-		<!-- Экран выбора друга для шахмат -->
-		<div id="chessFriendScreen" class="screen">
-			<h1>👥 Выбери друга</h1>
-			<div class="friends-list">
-				<div class="search-box">
-					<input type="text" id="friendSearch" placeholder="Поиск друга..." class="search-input">
-				</div>
-				<div id="friendsContainer" class="friends-container">
-				</div>
-			</div>
-			<button onclick="backToChessMenu()" class="back-btn">← Назад</button>
-		</div>
-
-		<!-- Экран шахматной игры -->
-		<div id="chessGameScreen" class="screen">
-			<div class="game-header">
-				<div class="game-stats">
-					<div class="stat" id="chessGameStatus">Подключение...</div>
-					<div class="stat">Игра: <span id="gameId">-</span></div>
-					<div class="stat">Цвет: <span id="playerColor">-</span></div>
-				</div>
-				<div class="game-controls">
-					<button onclick="offerDraw()" class="control-btn-small">🤝 Ничья</button>
-					<button onclick="surrenderChessGame()" class="control-btn-small">🏳️ Сдаться</button>
-					<button onclick="copyGameLink()" class="control-btn-small">🔗 Ссылка</button>
-					<button onclick="backToChessMenu()" class="control-btn-small">←</button>
-				</div>
-			</div>
-
-			<div class="game-area">
-				<div class="chess-board-container">
-					<canvas id="chessCanvas"></canvas>
-				</div>
-			</div>
-
-			<div class="game-info">
-				<div class="players-info">
-					<div class="player white">
-						<span class="player-color">⚪</span>
-						<span id="whitePlayer">Ожидание...</span>
-					</div>
-					<div class="player black">
-						<span class="player-color">⚫</span>
-						<span id="blackPlayer">Ожидание...</span>
-					</div>
-				</div>
-			</div>
-
-			<div class="game-instructions">
-				♟️ <b>Шахматы</b> - Ходите по очереди. Ваш ход подсвечен зеленым.
+				💡 Используйте стрелки или кнопки для управления
 			</div>
 		</div>
 
@@ -190,9 +141,9 @@
 
 	<script src="main.js"></script>
 	<script src="schedule.js"></script>
-	<script src="game.js"></script>
-	<script src="leaderboard.js"></script>
+	<script src="tetris.js"></script>
+	<script src="dance-game.js"></script>
+	<script src="gallery.js"></script>
 </body>
 
 </html>
-
