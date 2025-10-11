@@ -1,4 +1,3 @@
-// leaderboard.js
 async function loadLeaderboard() {
     const leadersList = document.getElementById('leadersList');
     if (!leadersList) return;
@@ -6,14 +5,12 @@ async function loadLeaderboard() {
     leadersList.innerHTML = '<div class="leader-item">Загрузка...</div>';
     
     try {
-        // Запрашиваем данные через WebApp
         if (window.Telegram && Telegram.WebApp) {
             Telegram.WebApp.sendData(JSON.stringify({
                 command: 'get_tetris_leaderboard'
             }));
         }
         
-        // Временные данные для демонстрации
         setTimeout(() => {
             const leaders = [
                 { name: "Игрок 1", score: 1500, lines: 45 },
@@ -54,7 +51,6 @@ function displayLeaders(leaders) {
     });
 }
 
-// Добавьте в style.css стили для таблицы лидеров:
 const leaderboardStyles = `
 .leaders-container {
     width: 100%;
@@ -110,7 +106,7 @@ const leaderboardStyles = `
 }
 `;
 
-// Добавьте стили в страницу
 const styleSheet = document.createElement('style');
 styleSheet.textContent = leaderboardStyles;
 document.head.appendChild(styleSheet);
+
