@@ -43,13 +43,21 @@ function initGame() {
         return;
     }
     
-    const canvasSize = getCanvasSize();
-    const blockSize = canvasSize / 10;
+    // Адаптивный размер с учетом плотности пикселей
+    const pixelRatio = window.devicePixelRatio || 1;
+    const maxWidth = Math.min(320, window.innerWidth - 40);
+    const blockSize = Math.floor(maxWidth / 10);
+    const canvasWidth = blockSize * 10;
+    const canvasHeight = blockSize * 20;
     
-    canvas.width = canvasSize;
-    canvas.height = blockSize * 20;
+    // Устанавливаем размеры с учетом pixel ratio
+    canvas.width = canvasWidth * pixelRatio;
+    canvas.height = canvasHeight * pixelRatio;
+    canvas.style.width = canvasWidth + 'px';
+    canvas.style.height = canvasHeight + 'px';
     
     const ctx = canvas.getContext('2d');
+    ctx.scale(pixelRatio, pixelRatio);
     
     const board = Array(20).fill().map(() => Array(10).fill(0));
     
@@ -65,7 +73,10 @@ function initGame() {
         dropInterval: 800,
         blockSize: blockSize,
         lastMoveTime: 0,
-        moveDelay: 100
+        moveDelay: 100,
+        renderX: 0,
+        renderY: 0,
+        pixelRatio: pixelRatio
     };
     
     updateGameStats();
@@ -189,22 +200,60 @@ function drawBoard(ctx) {
 function drawBlock(ctx, x, y, color, isPlaced = false) {
     const size = gameState.blockSize;
     
+    // Основной блок
     ctx.fillStyle = color;
     ctx.fillRect(x * size, y * size, size, size);
     
-    if (isPlaced) {
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-        ctx.fillRect(x * size, y * size, size, 2);
-        ctx.fillRect(x * size, y * size, 2, size);
+    // Градиент для 3D эффекта
+    const gradient = ctx.createLinearGradient(
+        x * size, y * size,
+        x * size + size, y * size + size
+    );
+    
+    if (!isPlaced) {
+        // Падающие блоки - яркие
+        gradient.addColorStop(0, color);
+        gradient.addColorStop(1, shadeColor(color, -30));
+        ctx.fillStyle = gradient;
+        ctx.fillRect(x * size, y * size, size, size);
         
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-        ctx.fillRect(x * size, y * size + size - 2, size, 2);
-        ctx.fillRect(x * size + size - 2, y * size, 2, size);
-    } else {
+        // Контур
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
         ctx.lineWidth = 2;
         ctx.strokeRect(x * size, y * size, size, size);
+        
+        // Блики
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.fillRect(x * size + 2, y * size + 2, size * 0.3, 2);
+        ctx.fillRect(x * size + 2, y * size + 2, 2, size * 0.3);
+    } else {
+        // Установленные блоки - темнее
+        gradient.addColorStop(0, shadeColor(color, -20));
+        gradient.addColorStop(1, shadeColor(color, -40));
+        ctx.fillStyle = gradient;
+        ctx.fillRect(x * size, y * size, size, size);
+        
+        // Тень для глубины
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        ctx.fillRect(x * size, y * size + size - 2, size, 2);
+        ctx.fillRect(x * size + size - 2, y * size, 2, size);
     }
+}
+
+function shadeColor(color, percent) {
+    let R = parseInt(color.substring(1,3),16);
+    let G = parseInt(color.substring(3,5),16);
+    let B = parseInt(color.substring(5,7),16);
+
+    R = parseInt(R * (100 + percent) / 100);
+    G = parseInt(G * (100 + percent) / 100);
+    B = parseInt(B * (100 + percent) / 100);
+
+    R = (R<255)?R:255;
+    G = (G<255)?G:255;
+    B = (B<255)?B:255;
+
+    return `#${R.toString(16).padStart(2,'0')}${G.toString(16).padStart(2,'0')}${B.toString(16).padStart(2,'0')}`;
 }
 
 function drawPiece(ctx, piece) {
@@ -305,7 +354,6 @@ function movePiece(dx, dy) {
         return true;
     }
     
-    // Если движение вниз невозможно - фиксируем фигуру
     if (dy > 0) {
         lockPiece();
         checkLines();
@@ -476,7 +524,6 @@ function setupMobileControls() {
         </div>
     `;
     
-    // ДОБАВЬ обработчики для кнопок
     document.getElementById('leftBtn').addEventListener('click', () => movePiece(-1, 0));
     document.getElementById('rightBtn').addEventListener('click', () => movePiece(1, 0));
     document.getElementById('downBtn').addEventListener('click', () => movePiece(0, 1));
@@ -490,13 +537,11 @@ function drawNextPiece() {
     const nextCtx = nextPieceCanvas.getContext('2d');
     nextCtx.clearRect(0, 0, nextPieceCanvas.width, nextPieceCanvas.height);
     
-    // Адаптивный размер для мобильных
     const isSmallScreen = window.innerWidth < 400;
     const canvasSize = isSmallScreen ? 60 : 80;
     nextPieceCanvas.width = canvasSize;
     nextPieceCanvas.height = canvasSize;
     
-    // Фон
     nextCtx.fillStyle = 'rgba(0, 0, 0, 0.3)';
     nextCtx.fillRect(0, 0, nextPieceCanvas.width, nextPieceCanvas.height);
     
@@ -508,11 +553,9 @@ function drawNextPiece() {
     for (let i = 0; i < piece.shape.length; i++) {
         for (let j = 0; j < piece.shape[i].length; j++) {
             if (piece.shape[i][j] !== 0) {
-                // Блок
                 nextCtx.fillStyle = COLORS[piece.color];
                 nextCtx.fillRect(offsetX + j * blockSize, offsetY + i * blockSize, blockSize, blockSize);
                 
-                // Контур
                 nextCtx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
                 nextCtx.lineWidth = 1;
                 nextCtx.strokeRect(offsetX + j * blockSize, offsetY + i * blockSize, blockSize, blockSize);
@@ -525,7 +568,6 @@ function saveScore() {
     console.log(`Счет сохранен: ${gameState.score}`);
 }
 
-// Таблица лидеров
 async function loadLeaderboard() {
     const leadersList = document.getElementById('leadersList');
     leadersList.innerHTML = '<div class="leader-item">Загрузка...</div>';
@@ -557,4 +599,27 @@ function displayLeaders(leaders) {
         `;
         leadersList.appendChild(leaderItem);
     });
+}
+
+function gameOver() {
+    gameState.gameActive = false;
+    
+    if (window.Telegram && Telegram.WebApp) {
+        const user = Telegram.WebApp.initDataUnsafe?.user;
+        if (user) {
+            fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    chat_id: user.id,
+                    text: `/tetris_score ${gameState.score} ${gameState.linesCleared}`
+                })
+            });
+        }
+    }
+    
+    setTimeout(() => {
+        alert(`🎮 Игра окончена!\n🏆 Ваш счет: ${gameState.score}\n📊 Линий собрано: ${gameState.linesCleared}`);
+        showLeaderboard();
+    }, 100);
 }
