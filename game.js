@@ -565,7 +565,18 @@ function drawNextPiece() {
 }
 
 function saveScore() {
-    console.log(`Счет сохранен: ${gameState.score}`);
+    if (window.Telegram && Telegram.WebApp) {
+        Telegram.WebApp.sendData(JSON.stringify({
+            command: 'tetris_score',
+            score: gameState.score,
+            lines: gameState.linesCleared
+        }));
+        
+        console.log('Результаты отправлены:', {
+            score: gameState.score,
+            lines: gameState.linesCleared
+        });
+    }
 }
 
 async function loadLeaderboard() {
@@ -603,7 +614,8 @@ function displayLeaders(leaders) {
 
 function gameOver() {
     gameState.gameActive = false;
-    
+     saveScore();
+
     if (window.Telegram && Telegram.WebApp) {
         const user = Telegram.WebApp.initDataUnsafe?.user;
         if (user) {
