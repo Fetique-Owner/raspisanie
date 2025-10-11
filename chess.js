@@ -1,4 +1,3 @@
-// chess.js - полная реализация шахмат с мультиплеером
 class ChessGame {
     constructor(playerColor = 'white') {
         this.board = this.initializeBoard();
@@ -489,3 +488,4 @@ function updateChessGameStatus() {
         }
     }
 }
+
