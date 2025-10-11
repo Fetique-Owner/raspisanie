@@ -464,3 +464,41 @@ function startChessGame(friendId, friendName) {
 document.addEventListener('DOMContentLoaded', function() {
     initChessAPI();
 });
+
+function initChessAPI() {
+    if (chessAPI.init()) {
+        console.log('Chess API инициализирован');
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const startParam = urlParams.get('startapp');
+        
+        if (startParam && startParam.startsWith('chess_')) {
+            const gameId = startParam.replace('chess_', '');
+            autoJoinChessGame(gameId);
+        }
+    } else {
+        console.log('Chess API не доступен');
+    }
+}
+
+async function autoJoinChessGame(gameId) {
+    showScreen('chessGameScreen');
+    
+    const result = await chessAPI.joinGame(gameId);
+    if (result.success) {
+        const playerColor = Math.random() > 0.5 ? 'white' : 'black';
+        
+        initChessGame(playerColor);
+        startGamePolling();
+        
+        document.getElementById('gameId').textContent = gameId.substring(0, 8) + '...';
+        document.getElementById('playerColor').textContent = 
+            playerColor === 'white' ? 'Белые' : 'Черные';
+            
+        document.getElementById('whitePlayer').textContent = 'Вы (Белые)';
+        document.getElementById('blackPlayer').textContent = 'Ожидание соперника...';
+    } else {
+        alert('Ошибка присоединения к игре: ' + result.error);
+        backToChessMenu();
+    }
+}
