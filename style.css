@@ -483,7 +483,6 @@ h1, h2 {
     color: #FF6B6B;
 }
 
-/* Адаптация для очень маленьких экранов */
 @media (max-width: 320px) {
     .container {
         padding: 8px;
@@ -524,7 +523,6 @@ h1, h2 {
     }
 }
 
-/* Портретная ориентация */
 @media (max-height: 600px) {
     .container {
         padding-bottom: 60px;
@@ -539,7 +537,204 @@ h1, h2 {
     }
 }
 
-/* Предотвращение zoom при касании */
 input, textarea, select, button {
     font-size: 16px;
+}
+
+.mobile-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 15px;
+    width: 100%;
+    max-width: 250px;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+}
+
+.control-row {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.control-btn {
+    width: 55px;
+    height: 55px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.control-btn:active {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(0.9);
+}
+
+.game-instructions {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 12px;
+    text-align: center;
+    margin-top: 10px;
+    backdrop-filter: blur(5px);
+    width: 100%;
+    max-width: 320px;
+    line-height: 1.4;
+}
+.hard-drop-btn {
+    background: linear-gradient(135deg, #FF6B6B, #FFA500) !important;
+    border: 2px solid #FFA500 !important;
+    font-weight: bold;
+}
+
+.rotate-btn {
+    background: linear-gradient(135deg, #4ECDC4, #45B7D1) !important;
+    border: 2px solid #45B7D1 !important;
+}
+
+.control-btn {
+    width: 60px;
+    height: 60px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(0, 255, 170, 0.2);
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(0, 255, 170, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    user-select: none;
+    box-shadow: 0 4px 15px rgba(0, 255, 170, 0.3);
+}
+
+.control-btn:active {
+    transform: scale(0.85);
+    box-shadow: 0 2px 8px rgba(0, 255, 170, 0.5);
+}
+
+.game-header-compact {
+    width: 100%;
+    max-width: 320px;
+    margin-bottom: 10px;
+}
+
+.game-info-panel {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 8px 12px;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.stats-grid {
+    display: flex;
+    gap: 12px;
+    flex: 1;
+}
+
+.stat-item {
+    text-align: center;
+    min-width: 50px;
+}
+
+.stat-label {
+    font-size: 9px;
+    opacity: 0.8;
+    margin-bottom: 2px;
+}
+
+.stat-value {
+    font-size: 14px;
+    font-weight: bold;
+    color: #4ECDC4;
+}
+
+.next-piece-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.next-label {
+    font-size: 9px;
+    opacity: 0.8;
+}
+
+#nextPieceCanvas {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.game-controls-compact {
+    display: flex;
+    gap: 6px;
+}
+
+.control-btn-small {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    min-width: 35px;
+}
+
+.control-btn-small:active {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(0.95);
+}
+
+@media (max-width: 350px) {
+    .game-info-panel {
+        padding: 6px 8px;
+        gap: 8px;
+    }
+    
+    .stats-grid {
+        gap: 8px;
+    }
+    
+    .stat-item {
+        min-width: 45px;
+    }
+    
+    .stat-value {
+        font-size: 12px;
+    }
+    
+    #nextPieceCanvas {
+        width: 50px !important;
+        height: 50px !important;
+    }
 }
