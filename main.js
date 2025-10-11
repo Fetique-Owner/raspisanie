@@ -348,20 +348,25 @@ function offerDraw() {
         });
     }
 }
+
 function initChessAPI() {
     if (chessAPI.init()) {
         console.log('Chess API инициализирован');
         
-        const urlParams = new URLSearchParams(window.location.search);
-        const chessGameId = urlParams.get('chess');
+        const hash = window.location.hash.substring(1);
         
-        if (chessGameId) {
-            autoJoinChessGame(chessGameId);
+        if (hash.startsWith('chess=')) {
+            const gameId = hash.replace('chess=', '');
+            autoJoinChessGame(gameId);
         }
     } else {
         console.log('Chess API не доступен');
     }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    initChessAPI();
+});
 
 async function autoJoinChessGame(gameId) {
     showScreen('chessGameScreen');
@@ -459,26 +464,6 @@ function copyGameLink() {
 
 function startChessGame(friendId, friendName) {
     createNewChessGame();
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    initChessAPI();
-});
-
-function initChessAPI() {
-    if (chessAPI.init()) {
-        console.log('Chess API инициализирован');
-        
-        const urlParams = new URLSearchParams(window.location.search);
-        const startParam = urlParams.get('startapp');
-        
-        if (startParam && startParam.startsWith('chess_')) {
-            const gameId = startParam.replace('chess_', '');
-            autoJoinChessGame(gameId);
-        }
-    } else {
-        console.log('Chess API не доступен');
-    }
 }
 
 async function autoJoinChessGame(gameId) {
