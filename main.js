@@ -108,3 +108,13 @@ function loadScript(src) {
         document.head.appendChild(script);
     });
 }
+
+function updateGameStats(score, level, lines) {
+    const scoreElem = document.getElementById('score');
+    const levelElem = document.getElementById('level');
+    const linesElem = document.getElementById('lines');
+    
+    if (scoreElem) scoreElem.textContent = score || 0;
+    if (levelElem) levelElem.textContent = level || 1;
+    if (linesElem) linesElem.textContent = lines || 0;
+}
