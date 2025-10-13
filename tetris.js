@@ -50,8 +50,7 @@ function initGame() {
     gameState.canvas = canvas;
     gameState.ctx = canvas.getContext('2d');
     
-    // Адаптивный размер - более компактный для мобильных
-    const maxWidth = Math.min(280, window.innerWidth - 30);
+    const maxWidth = Math.min(280, window.innerWidth - 40);
     gameState.blockSize = Math.floor(maxWidth / BOARD_WIDTH);
     const canvasWidth = gameState.blockSize * BOARD_WIDTH;
     const canvasHeight = gameState.blockSize * BOARD_HEIGHT;
@@ -63,6 +62,8 @@ function initGame() {
     
     resetGame();
     setupControls();
+    setupMobileControlsLayout();
+    preventScrollOnControls();
     gameLoop();
 }
 
@@ -409,20 +410,54 @@ function setupControls() {
     setupSwipeControls();
 }
 
-function setupMobileControls() {
+function setupMobileControlsLayout() {
     const controls = document.getElementById('mobileControls');
     if (!controls) return;
     
-    controls.innerHTML = `
-        <div class="control-row">
-            <button onclick="rotatePiece()" class="control-btn">↻</button>
-        </div>
-        <div class="control-row">
-            <button onclick="movePiece(-1, 0)" class="control-btn">←</button>
-            <button onclick="movePiece(0, 1)" class="control-btn">↓</button>
-            <button onclick="movePiece(1, 0)" class="control-btn">→</button>
-        </div>
-    `;
+    controls.style.position = 'fixed';
+    controls.style.bottom = '0';
+    controls.style.left = '0';
+    controls.style.right = '0';
+    controls.style.transform = 'none';
+    controls.style.zIndex = '1000';
+    
+    controls.className = 'mobile-controls no-select';
+}
+
+function preventScrollOnControls() {
+    document.addEventListener('touchstart', function(e) {
+        if (e.target.closest('.control-btn') || 
+            e.target.closest('.mobile-controls-container')) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+    
+    document.addEventListener('touchmove', function(e) {
+        if (e.target.closest('.control-btn') || 
+            e.target.closest('.mobile-controls-container')) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+}
+
+function setupMobileControls() {
+    const buttons = document.querySelectorAll('.static-controls .control-btn');
+    buttons.forEach(btn => {
+        btn.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            this.style.transform = 'scale(0.85)';
+        });
+        
+        btn.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            this.style.transform = 'scale(1)';
+        });
+        
+        btn.addEventListener('touchcancel', function(e) {
+            e.preventDefault();
+            this.style.transform = 'scale(1)';
+        });
+    });
 }
 
 function setupSwipeControls() {
@@ -660,4 +695,43 @@ function saveScore() {
             lines: gameState.linesCleared
         }));
     }
+}
+
+function preventScrollOnControls() {
+    document.addEventListener('touchmove', function(e) {
+        const controls = document.getElementById('mobileControls');
+        if (controls && controls.contains(e.target)) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+    
+    document.addEventListener('gesturestart', function(e) {
+        e.preventDefault();
+    });
+    
+    document.addEventListener('gesturechange', function(e) {
+        e.preventDefault();
+    });
+    
+    document.addEventListener('gestureend', function(e) {
+        e.preventDefault();
+    });
+}
+
+function preventScrollOnControls() {
+    document.addEventListener('touchstart', function(e) {
+        if (e.target.closest('.mobile-controls') || 
+            e.target.closest('.control-btn') || 
+            e.target.closest('.mobile-controls-container')) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+    
+    document.addEventListener('touchmove', function(e) {
+        if (e.target.closest('.mobile-controls') || 
+            e.target.closest('.control-btn') || 
+            e.target.closest('.mobile-controls-container')) {
+            e.preventDefault();
+        }
+    }, { passive: false });
 }
