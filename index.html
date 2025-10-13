@@ -124,10 +124,15 @@
 			</div>
 
 			<!-- Мобильное управление -->
-			<div id="mobileControls" class="mobile-controls"></div>
-
-			<div class="game-instructions">
-				💡 Используйте стрелки или кнопки для управления
+			<div class="static-controls">
+				<div class="control-row">
+					<button onclick="rotatePiece()" class="control-btn rotate" title="Повернуть">↻</button>
+				</div>
+				<div class="control-row">
+					<button onclick="movePiece(-1, 0)" class="control-btn" title="Влево">←</button>
+					<button onclick="movePiece(0, 1)" class="control-btn down" title="Вниз">↓</button>
+					<button onclick="movePiece(1, 0)" class="control-btn" title="Вправо">→</button>
+				</div>
 			</div>
 		</div>
 
