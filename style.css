@@ -21,7 +21,7 @@ body {
     align-items: center;
     padding: 10px;
     padding-top: 20px;
-    padding-bottom: 180px; /* Место для фиксированного управления */
+    padding-bottom: 180px;
 }
 
 .screen {
@@ -45,7 +45,6 @@ h1, h2 {
     font-size: 1.5rem;
 }
 
-/* Главное меню */
 .main-options {
     display: flex;
     flex-direction: column;
@@ -91,7 +90,6 @@ h1, h2 {
     margin-top: 3px;
 }
 
-/* Меню игры */
 .menu-options {
     display: flex;
     flex-direction: column;
@@ -123,7 +121,6 @@ h1, h2 {
     border-color: rgba(255, 255, 255, 0.3);
 }
 
-/* Игровой экран - ВЕРХНЯЯ ПЛАШКА КАК БЫЛО */
 .game-header {
     display: flex;
     flex-wrap: wrap;
@@ -210,7 +207,6 @@ h1, h2 {
     transform: scale(0.95);
 }
 
-/* Игровое поле */
 .game-area {
     display: flex;
     justify-content: center;
@@ -225,7 +221,6 @@ h1, h2 {
     touch-action: none;
 }
 
-/* Мобильное управление - ФИКСИРОВАННОЕ НАД КЛАВИАТУРОЙ */
 .mobile-controls {
     position: fixed;
     bottom: 0;
@@ -300,7 +295,6 @@ h1, h2 {
     line-height: 1.4;
 }
 
-/* Кнопка назад */
 .back-btn {
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.25);
@@ -312,7 +306,6 @@ h1, h2 {
     margin-top: 8px;
 }
 
-/* Расписание */
 .schedule-container {
     width: 100%;
     background: rgba(255, 255, 255, 0.08);
@@ -384,7 +377,6 @@ h1, h2 {
     margin-top: 2px;
 }
 
-/* Адаптивность */
 @media (max-width: 320px) {
     .container {
         padding: 8px;
@@ -456,7 +448,6 @@ input, textarea, select, button {
     font-size: 16px;
 }
 
-/* Компактная верхняя плашка */
 .game-header-compact {
     width: 100%;
     max-width: 320px;
@@ -537,7 +528,6 @@ input, textarea, select, button {
     transform: scale(0.95);
 }
 
-/* Игровое поле */
 .game-area {
     display: flex;
     justify-content: center;
@@ -557,11 +547,12 @@ input, textarea, select, button {
     border-radius: 15px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     margin-top: 10px;
+    position: relative;
+    z-index: 100;
 }
 
 
 
-/* Мобильное управление - ФИКСИРОВАННОЕ */
 .mobile-controls {
     position: fixed;
     bottom: 0;
@@ -630,7 +621,6 @@ input, textarea, select, button {
     background: linear-gradient(145deg, #45B7D1, #2E8B57);
 }
 
-/* Инструкции */
 .game-instructions {
     position: fixed;
     bottom: 130px;
@@ -648,7 +638,6 @@ input, textarea, select, button {
     z-index: 999;
 }
 
-/* Адаптивность для маленьких экранов */
 @media (max-width: 320px) {
     .game-info-panel {
         padding: 8px;
@@ -701,4 +690,162 @@ input, textarea, select, button {
     .control-btn.rotate {
         width: 65px;
     }
+}
+
+@media (max-width: 480px) {
+    .game-header-compact {
+        max-width: 100%;
+        padding: 0 10px;
+    }
+    
+    .game-info-panel {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+        padding: 8px;
+    }
+    
+    .stats-grid {
+        order: 1;
+        flex: 1;
+        min-width: 60%;
+    }
+    
+    .next-piece-panel {
+        order: 2;
+    }
+    
+    .game-controls-compact {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+        margin-top: 5px;
+    }
+    
+    #gameCanvas {
+        max-height: 50vh;
+    }
+}
+
+.game-container {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    width: 100%;
+    max-width: 400px;
+    align-items: flex-start;
+}
+
+.side-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    min-width: 100px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 10px;
+    border-radius: 10px;
+    backdrop-filter: blur(8px);
+}
+
+.stats-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.next-piece-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.game-controls-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.control-btn-small {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: white;
+    padding: 6px 8px;
+    border-radius: 5px;
+    font-size: 11px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.control-btn-small:active {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(0.95);
+}
+
+@media (max-width: 380px) {
+    .game-container {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .side-panel {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .stats-panel {
+        flex-direction: row;
+        gap: 15px;
+    }
+    
+    .game-controls-panel {
+        flex-direction: row;
+    }
+}
+
+@media (max-height: 700px) {
+    .game-container {
+        max-width: 350px;
+    }
+    
+    .side-panel {
+        min-width: 90px;
+        padding: 8px;
+    }
+}
+
+.control-btn {
+    width: 70px;
+    height: 70px;
+    border: none;
+    border-radius: 18px;
+    background: linear-gradient(145deg, #4ECDC4, #2E8B57);
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    touch-action: manipulation;
+}
+
+.control-btn:active {
+    transform: scale(0.85);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+}
+
+.static-controls {
+    position: relative;
+    z-index: 1000;
+    pointer-events: auto;
 }
