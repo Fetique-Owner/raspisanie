@@ -1,3 +1,11 @@
+window.showScreen = function(screenId) {
+    console.log('Showing screen:', screenId);
+    document.querySelectorAll('.screen').forEach(screen => {
+        screen.classList.remove('active');
+    });
+    document.getElementById(screenId).classList.add('active');
+};
+
 function showScreen(screenId) {
     document.querySelectorAll('.screen').forEach(screen => {
         screen.classList.remove('active');
@@ -68,13 +76,6 @@ function startGame() {
     showScreen('gameScreen');
     if (typeof initGame === 'function') {
         initGame();
-    }
-}
-
-function showLeaderboard() {
-    showScreen('leaderboardScreen');
-    if (typeof loadLeaderboard === 'function') {
-        loadLeaderboard();
     }
 }
 
