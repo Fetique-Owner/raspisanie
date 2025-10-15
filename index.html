@@ -79,9 +79,6 @@
 				<button onclick="startGame()" class="menu-btn">
 					🎮 Начать игру
 				</button>
-				<button onclick="showLeaderboard()" class="menu-btn">
-					🏆 Таблица лидеров
-				</button>
 				<button onclick="backToGamesMenu()" class="menu-btn back">
 					← Назад
 				</button>
@@ -90,9 +87,10 @@
 
 		<!-- Игровой экран -->
 		<div id="gameScreen" class="screen">
-			<div class="game-header-compact">
-				<div class="game-info-panel">
-					<div class="stats-grid">
+			<div class="game-container">
+				<!-- Боковая панель с информацией -->
+				<div class="side-panel">
+					<div class="stats-panel">
 						<div class="stat-item">
 							<div class="stat-label">Очки</div>
 							<div id="score" class="stat-value">0</div>
@@ -112,43 +110,35 @@
 						<canvas id="nextPieceCanvas" width="60" height="60"></canvas>
 					</div>
 
-					<div class="game-controls-compact">
-						<button onclick="restartGame()" class="control-btn-small">🔄</button>
-						<button onclick="backToGameMenu()" class="control-btn-small">←</button>
+					<div class="game-controls-panel">
+						<button onclick="restartGame()" class="control-btn-small">🔄 Новый</button>
+						<button onclick="backToGameMenu()" class="control-btn-small">← Выход</button>
 					</div>
 				</div>
-			</div>
 
-			<div class="game-area">
-				<canvas id="gameCanvas"></canvas>
+				<!-- Игровое поле -->
+				<div class="game-area">
+					<canvas id="gameCanvas"></canvas>
+				</div>
 			</div>
 
 			<!-- Мобильное управление -->
 			<div class="static-controls">
 				<div class="control-row">
-					<button onclick="rotatePiece()" class="control-btn rotate" title="Повернуть">↻</button>
+					<button onclick="handleRotate()" class="control-btn rotate" title="Повернуть">↻</button>
 				</div>
 				<div class="control-row">
-					<button onclick="movePiece(-1, 0)" class="control-btn" title="Влево">←</button>
-					<button onclick="movePiece(0, 1)" class="control-btn down" title="Вниз">↓</button>
-					<button onclick="movePiece(1, 0)" class="control-btn" title="Вправо">→</button>
+					<button onclick="handleMoveLeft()" class="control-btn" title="Влево">←</button>
+					<button onclick="handleMoveDown()" class="control-btn down" title="Вниз">↓</button>
+					<button onclick="handleMoveRight()" class="control-btn" title="Вправо">→</button>
 				</div>
 			</div>
-		</div>
 
-		<!-- Таблица лидеров -->
-		<div id="leaderboardScreen" class="screen">
-			<h2>🏆 Таблица лидеров</h2>
-			<div id="leadersList" class="leaders-container"></div>
-			<button onclick="backToGameMenu()" class="back-btn">← Назад</button>
-		</div>
-	</div>
-
-	<script src="main.js"></script>
-	<script src="schedule.js"></script>
-	<script src="tetris.js"></script>
-	<script src="dance-game.js"></script>
-	<script src="gallery.js"></script>
+			<script src="main.js"></script>
+			<script src="schedule.js"></script>
+			<script src="tetris.js"></script>
+			<script src="dance-game.js"></script>
+			<script src="gallery.js"></script>
 </body>
 
 </html>
