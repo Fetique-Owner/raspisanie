@@ -1,5 +1,5 @@
-const BOARD_WIDTH = 10;
-const BOARD_HEIGHT = 20;
+const BOARD_WIDTH = 8;
+const BOARD_HEIGHT = 14;
 
 CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
     if (w < 2 * r) r = w / 2;
@@ -40,6 +40,9 @@ let gameState = {
     particles: []
 };
 
+console.log('Tetris script loaded');
+console.log('gameState:', gameState);
+
 function initGame() {
     const canvas = document.getElementById('gameCanvas');
     if (!canvas) {
@@ -50,8 +53,12 @@ function initGame() {
     gameState.canvas = canvas;
     gameState.ctx = canvas.getContext('2d');
     
-    const maxWidth = Math.min(280, window.innerWidth - 40);
-    gameState.blockSize = Math.floor(maxWidth / BOARD_WIDTH);
+    const maxBlockSize = Math.min(
+        30, 
+        Math.floor(Math.min(window.innerWidth * 0.35, window.innerHeight * 0.4) / BOARD_WIDTH)
+    );
+    
+    gameState.blockSize = maxBlockSize;
     const canvasWidth = gameState.blockSize * BOARD_WIDTH;
     const canvasHeight = gameState.blockSize * BOARD_HEIGHT;
     
@@ -62,12 +69,12 @@ function initGame() {
     
     resetGame();
     setupControls();
-    setupMobileControlsLayout();
-    preventScrollOnControls();
     gameLoop();
 }
 
 function resetGame() {
+    console.log('Resetting game state...');
+    
     gameState.board = Array(BOARD_HEIGHT).fill().map(() => Array(BOARD_WIDTH).fill(0));
     gameState.currentPiece = generateNewPiece();
     gameState.nextPiece = generateNewPiece();
@@ -82,6 +89,10 @@ function resetGame() {
     updateGameStats();
     drawNextPiece();
     createBackgroundParticles();
+    
+    console.log('Game reset complete');
+    
+    gameLoop();
 }
 
 function generateNewPiece() {
@@ -107,36 +118,41 @@ function generateNewPiece() {
 }
 
 function gameLoop() {
-    if (!gameState.gameActive) {
-        drawGameOver();
+    if (!gameState.gameActive && gameState.currentPiece === null) {
         requestAnimationFrame(gameLoop);
         return;
     }
     
-    const currentTime = Date.now();
-    
-    drawBackground();
-    updateParticles();
-    drawGrid();
-    
-    // Отрисовка установленных блоков
-    for (let y = 0; y < BOARD_HEIGHT; y++) {
-        for (let x = 0; x < BOARD_WIDTH; x++) {
-            if (gameState.board[y][x] !== 0) {
-                drawColorfulBlock(x, y, gameState.board[y][x] - 1, true);
+    try {
+        const currentTime = Date.now();
+        
+        drawBackground();
+        updateParticles();
+        drawGrid();
+        
+        for (let y = 0; y < BOARD_HEIGHT; y++) {
+            for (let x = 0; x < BOARD_WIDTH; x++) {
+                if (gameState.board[y][x] !== 0) {
+                    drawColorfulBlock(x, y, gameState.board[y][x] - 1, true);
+                }
             }
         }
-    }
-    
-    // Отрисовка текущей фигуры
-    if (gameState.currentPiece) {
-        drawPiece(gameState.currentPiece);
         
-        // Автоматическое падение
-        if (currentTime - gameState.dropTime > gameState.dropInterval) {
-            movePiece(0, 1);
-            gameState.dropTime = currentTime;
+        if (gameState.gameActive) {
+            if (gameState.currentPiece) {
+                drawPiece(gameState.currentPiece);
+                
+                if (currentTime - gameState.dropTime > gameState.dropInterval) {
+                    movePiece(0, 1);
+                    gameState.dropTime = currentTime;
+                }
+            }
+        } else {
+            drawGameOver();
         }
+        
+    } catch (error) {
+        console.error('Error in gameLoop:', error);
     }
     
     requestAnimationFrame(gameLoop);
@@ -276,27 +292,6 @@ function drawPiece(piece) {
     }
 }
 
-function movePiece(dx, dy) {
-    if (!gameState.currentPiece) return false;
-    
-    const newX = gameState.currentPiece.x + dx;
-    const newY = gameState.currentPiece.y + dy;
-    
-    if (isValidMove(gameState.currentPiece.shape, newX, newY)) {
-        gameState.currentPiece.x = newX;
-        gameState.currentPiece.y = newY;
-        return true;
-    }
-    
-    if (dy > 0) {
-        lockPiece();
-        checkLines();
-        spawnNewPiece();
-    }
-    
-    return false;
-}
-
 function isValidMove(shape, x, y) {
     for (let py = 0; py < shape.length; py++) {
         for (let px = 0; px < shape[py].length; px++) {
@@ -339,9 +334,12 @@ function spawnNewPiece() {
     drawNextPiece();
     
     if (!isValidMove(gameState.currentPiece.shape, gameState.currentPiece.x, gameState.currentPiece.y)) {
+        console.log('GAME OVER - Cannot spawn new piece');
         gameState.gameActive = false;
         saveScore();
         createGameOverParticles();
+        
+        console.log('Game over state set');
     }
 }
 
@@ -371,43 +369,6 @@ function checkLines() {
         
         updateGameStats();
     }
-}
-
-function rotatePiece() {
-    if (!gameState.currentPiece) return;
-    
-    const shape = gameState.currentPiece.shape;
-    const rows = shape.length;
-    const cols = shape[0].length;
-    
-    const rotated = [];
-    for (let x = 0; x < cols; x++) {
-        rotated[x] = [];
-        for (let y = 0; y < rows; y++) {
-            rotated[x][y] = shape[rows - 1 - y][x];
-        }
-    }
-    
-    if (isValidMove(rotated, gameState.currentPiece.x, gameState.currentPiece.y)) {
-        gameState.currentPiece.shape = rotated;
-    }
-}
-
-function setupControls() {
-    // Клавиатура
-    document.addEventListener('keydown', (e) => {
-        if (!gameState.gameActive) return;
-        
-        switch(e.code) {
-            case 'ArrowLeft': movePiece(-1, 0); break;
-            case 'ArrowRight': movePiece(1, 0); break;
-            case 'ArrowDown': movePiece(0, 1); break;
-            case 'ArrowUp': rotatePiece(); break;
-        }
-    });
-    
-    setupMobileControls();
-    setupSwipeControls();
 }
 
 function setupMobileControlsLayout() {
@@ -460,10 +421,18 @@ function setupMobileControls() {
     });
 }
 
+function hardDrop() {
+    if (!gameState.currentPiece) return;
+    
+    while (movePiece(0, 1)) {
+    }
+}
+
 function setupSwipeControls() {
     let startX, startY;
     
     gameState.canvas.addEventListener('touchstart', (e) => {
+        if (!gameState.gameActive) return;
         startX = e.touches[0].clientX;
         startY = e.touches[0].clientY;
         e.preventDefault();
@@ -477,7 +446,7 @@ function setupSwipeControls() {
         
         const diffX = endX - startX;
         const diffY = endY - startY;
-        const minSwipe = 30;
+        const minSwipe = 20;
         
         if (Math.abs(diffX) > Math.abs(diffY)) {
             if (Math.abs(diffX) > minSwipe) {
@@ -607,17 +576,17 @@ function drawGameOver() {
     ctx.stroke();
     
     ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 22px Arial';
+    ctx.font = 'bold 18px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText(' ИГРА ОКОНЧЕНА ', gameState.canvas.width / 2, boxY + 35);
+    ctx.fillText('ИГРА ОКОНЧЕНА', gameState.canvas.width / 2, boxY + 35);
     
-    ctx.font = '18px Arial';
+    ctx.font = '16px Arial';
     ctx.fillStyle = '#4ECDC4';
     ctx.fillText(`🏆 Счет: ${gameState.score}`, gameState.canvas.width / 2, boxY + 65);
     
-    ctx.font = '14px Arial';
+    ctx.font = '12px Arial';
     ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-    ctx.fillText('Нажмите 🔄 для новой игры', gameState.canvas.width / 2, boxY + 90);
+    ctx.fillText('Нажмите "🔄 Новый" для перезапуска', gameState.canvas.width / 2, boxY + 90);
     
     const pulse = Math.sin(Date.now() * 0.005) * 0.1 + 0.9;
     ctx.strokeStyle = `rgba(78, 205, 196, ${pulse})`;
@@ -734,4 +703,175 @@ function preventScrollOnControls() {
             e.preventDefault();
         }
     }, { passive: false });
+}
+
+window.movePiece = movePiece;
+window.rotatePiece = rotatePiece;
+
+// Глобальные функции для кнопок
+window.handleMoveLeft = function() {
+    console.log('LEFT button clicked');
+    if (gameState.gameActive && gameState.currentPiece) {
+        movePiece(-1, 0);
+    }
+};
+
+window.handleMoveRight = function() {
+    console.log('RIGHT button clicked');
+    if (gameState.gameActive && gameState.currentPiece) {
+        movePiece(1, 0);
+    }
+};
+
+window.handleMoveDown = function() {
+    console.log('DOWN button clicked');
+    if (gameState.gameActive && gameState.currentPiece) {
+        movePiece(0, 1);
+    }
+};
+
+window.handleRotate = function() {
+    console.log('ROTATE button clicked');
+    if (gameState.gameActive && gameState.currentPiece) {
+        rotatePiece();
+    }
+};
+
+window.restartGame = function() {
+    console.log('RESTART game called');
+    
+    gameState.gameActive = false;
+    
+    setTimeout(() => {
+        console.log('Performing full reset...');
+        resetGame();
+    }, 100);
+};
+
+window.backToGameMenu = function() {
+    console.log('BACK to menu');
+    gameState.gameActive = false;
+    
+    if (typeof showScreen === 'function') {
+        showScreen('SextrisMenu');
+    } else {
+        // Fallback
+        document.querySelectorAll('.screen').forEach(screen => {
+            screen.classList.remove('active');
+        });
+        document.getElementById('SextrisMenu').classList.add('active');
+    }
+};
+
+function setupControls() {
+    console.log('Setting up controls...');
+    
+    document.addEventListener('keydown', (e) => {
+        if (!gameState.gameActive) return;
+        
+        switch(e.code) {
+            case 'ArrowLeft': 
+            case 'KeyA':
+                console.log('Keyboard LEFT');
+                movePiece(-1, 0); 
+                break;
+            case 'ArrowRight': 
+            case 'KeyD':
+                console.log('Keyboard RIGHT');
+                movePiece(1, 0); 
+                break;
+            case 'ArrowDown': 
+            case 'KeyS':
+                console.log('Keyboard DOWN');
+                movePiece(0, 1); 
+                break;
+            case 'ArrowUp': 
+            case 'KeyW':
+            case 'KeyR':
+                console.log('Keyboard ROTATE');
+                rotatePiece(); 
+                break;
+            case 'Space':
+                console.log('Keyboard SPACE');
+                hardDrop();
+                break;
+        }
+    });
+    
+    // Свайпы
+    setupSwipeControls();
+    
+    console.log('Controls setup complete');
+}
+
+function movePiece(dx, dy) {
+    console.log('movePiece called:', dx, dy, 'gameActive:', gameState.gameActive);
+    if (!gameState.currentPiece) {
+        console.log('No current piece');
+        return false;
+    }
+    
+    const newX = gameState.currentPiece.x + dx;
+    const newY = gameState.currentPiece.y + dy;
+    
+    console.log('New position:', newX, newY);
+    
+    if (isValidMove(gameState.currentPiece.shape, newX, newY)) {
+        gameState.currentPiece.x = newX;
+        gameState.currentPiece.y = newY;
+        console.log('Move successful');
+        return true;
+    }
+    
+    if (dy > 0) {
+        console.log('Locking piece');
+        lockPiece();
+        checkLines();
+        spawnNewPiece();
+    }
+    
+    console.log('Move failed');
+    return false;
+}
+
+function rotatePiece() {
+    console.log('rotatePiece called', 'gameActive:', gameState.gameActive);
+    if (!gameState.currentPiece) {
+        console.log('No current piece to rotate');
+        return;
+    }
+    
+    const shape = gameState.currentPiece.shape;
+    const rows = shape.length;
+    const cols = shape[0].length;
+    
+    const rotated = [];
+    for (let x = 0; x < cols; x++) {
+        rotated[x] = [];
+        for (let y = 0; y < rows; y++) {
+            rotated[x][y] = shape[rows - 1 - y][x];
+        }
+    }
+    
+    console.log('Trying to rotate piece');
+    
+    if (isValidMove(rotated, gameState.currentPiece.x, gameState.currentPiece.y)) {
+        gameState.currentPiece.shape = rotated;
+        console.log('Rotation successful');
+    } else {
+        console.log('Rotation failed - invalid move');
+    }
+}
+
+if (typeof showScreen === 'undefined') {
+    window.showScreen = function(screenId) {
+        console.log('Showing screen:', screenId);
+        document.querySelectorAll('.screen').forEach(screen => {
+            screen.classList.remove('active');
+        });
+        const targetScreen = document.getElementById(screenId);
+        if (targetScreen) {
+            targetScreen.classList.add('active');
+        }
+    };
 }
